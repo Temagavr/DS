@@ -22,6 +22,10 @@ namespace Valuator
         public void Store(string key, string value)
         {
             _logger.LogWarning("{0}, {1}", key, value);
+            
+            if(key == "" || value == "")
+                return;
+
             _db.StringSet(key, value);
         }
 
