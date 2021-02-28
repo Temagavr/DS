@@ -34,16 +34,13 @@ namespace Valuator.Pages
             string similarity = CheckSimilarity(text).ToString();
 
             string textKey = "TEXT-" + id;
-            //TODO: сохранить в БД text по ключу textKey
             _storage.Store(textKey, text);
 
             string rankKey = "RANK-" + id;
-            //TODO: посчитать rank и сохранить в БД по ключу rankKey
             string rank = CalcRank(text).ToString();
             _storage.Store(rankKey, rank);
 
             string similarityKey = "SIMILARITY-" + id;
-            //TODO: посчитать similarity и сохранить в БД по ключу similarityKey
             _storage.Store(similarityKey, similarity);            
 
             return Redirect($"summary?id={id}");

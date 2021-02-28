@@ -27,7 +27,6 @@ namespace Valuator.Pages
         {
             _logger.LogDebug(id);
 
-            //TODO: проинициализировать свойства Rank и Similarity сохранёнными в БД значениями
             Rank = Convert.ToDouble(_storage.Load("RANK-" + id));
             Similarity = Convert.ToDouble(_storage.Load("SIMILARITY-" + id));
         }
