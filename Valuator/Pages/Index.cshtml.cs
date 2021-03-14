@@ -39,10 +39,7 @@ namespace Valuator.Pages
             string textKey = Constants.textPrefix + id;
             _storage.Store(textKey, text);
 
-            // string rankKey = Constants.rankPrefix + id;
-            // string rank = CalcRank(text).ToString();
-            // _storage.Store(rankKey, rank);
-            SendMsg(id);
+            ActivateRankCalculator(id);
 
             string similarityKey = Constants.similarityPrefix + id;
             _storage.Store(similarityKey, similarity);            
@@ -67,7 +64,7 @@ namespace Valuator.Pages
             return similarity;
         }
 
-        public void SendMsg(string id)
+        public void ActivateRankCalculator(string id)
         {
             IConnection connection = new ConnectionFactory().CreateConnection();
             
@@ -84,7 +81,7 @@ namespace Valuator.Pages
             // cts.Cancel();
         }
         
-        // Не получается сделать через этот метод, как будто бы он не вызывается 
+        // Не получается сделать через этот метод, пока не знаю почему
         static async Task ProduceAsync(CancellationToken ct, string id) 
         {
             Console.WriteLine("TEST123123");

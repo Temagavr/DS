@@ -45,5 +45,10 @@ namespace Valuator
             }
             return texts;
         }
+
+        public bool ExistKey(string key)
+        {
+            return (bool)_db.Execute("exists", key);
+        }
     }
 }

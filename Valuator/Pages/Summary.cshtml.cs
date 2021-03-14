@@ -26,9 +26,17 @@ namespace Valuator.Pages
         public void OnGet(string id)
         {
             _logger.LogDebug(id);
+            
+            for(int check = 0; check < 10; ++check)
+            {
+                if(_storage.ExistKey(Constants.rankPrefix + id))
+                {
+                    Rank = Convert.ToDouble(_storage.Load(Constants.rankPrefix + id));
+                    break;
+                }
+            }
 
-            Rank = Convert.ToDouble(_storage.Load("RANK-" + id));
-            Similarity = Convert.ToDouble(_storage.Load("SIMILARITY-" + id));
+            Similarity = Convert.ToDouble(_storage.Load(Constants.similarityPrefix + id));
         }
     }
 }

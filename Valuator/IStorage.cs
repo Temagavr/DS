@@ -10,5 +10,7 @@ namespace Valuator
         string Load(string key);
         
         List<string> GetAllTexts();
+
+        bool ExistKey(string key);
     }
 }
