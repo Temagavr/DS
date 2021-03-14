@@ -84,7 +84,6 @@ namespace Valuator.Pages
         // Не получается сделать через этот метод, пока не знаю почему
         static async Task ProduceAsync(CancellationToken ct, string id) 
         {
-            Console.WriteLine("TEST123123");
             using (IConnection connection = new ConnectionFactory().CreateConnection())
             {
                 byte[] data = Encoding.UTF8.GetBytes(id);
