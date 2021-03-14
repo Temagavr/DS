@@ -2,8 +2,8 @@ namespace Valuator
 {
     public static class Constants
     {
-        public static const textPrefix = "TEXT-";
-        public static const similarityPrefix = "SIMILARITY-";
-        public static const rankPrefix = "RANK-";
+        public const string textPrefix = "TEXT-";
+        public const string similarityPrefix = "SIMILARITY-";
+        public const string rankPrefix = "RANK-";
     }
 }

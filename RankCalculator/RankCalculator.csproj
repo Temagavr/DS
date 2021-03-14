@@ -9,4 +9,10 @@
     <PackageReference Include="NATS.Client" Version="0.12.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Valuator">
+      <HintPath>..\Valuator\bin\Debug\net5.0\Valuator.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

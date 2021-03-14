@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using NATS.Client;
 
 namespace Valuator.Pages
 {
@@ -33,28 +36,18 @@ namespace Valuator.Pages
 
             string similarity = CheckSimilarity(text).ToString();
 
-            string textKey = "TEXT-" + id;
+            string textKey = Constants.textPrefix + id;
             _storage.Store(textKey, text);
 
-            string rankKey = "RANK-" + id;
-            string rank = CalcRank(text).ToString();
-            _storage.Store(rankKey, rank);
+            // string rankKey = Constants.rankPrefix + id;
+            // string rank = CalcRank(text).ToString();
+            // _storage.Store(rankKey, rank);
+            SendMsg(id);
 
-            string similarityKey = "SIMILARITY-" + id;
+            string similarityKey = Constants.similarityPrefix + id;
             _storage.Store(similarityKey, similarity);            
 
             return Redirect($"summary?id={id}");
-        }
-
-        public double CalcRank(string text)
-        {
-            double length = text.Length, notCharsCount = 0; 
-            for(int i = 0; i != length; ++i)
-            {
-                if(!Char.IsLetter(text[i]))
-                    ++notCharsCount;
-            }
-            return Math.Round(notCharsCount / length, 2);
         }
 
         public int CheckSimilarity(string text)
@@ -72,6 +65,40 @@ namespace Valuator.Pages
             }
 
             return similarity;
+        }
+
+        public void SendMsg(string id)
+        {
+            IConnection connection = new ConnectionFactory().CreateConnection();
+            
+            byte[] data = Encoding.UTF8.GetBytes(id);
+            connection.Publish("valuator.processing.rank", data);
+
+            connection.Drain();
+
+            connection.Close();
+            // CancellationTokenSource cts = new CancellationTokenSource();
+
+            // Task.Factory.StartNew(() => ProduceAsync(cts.Token, id), cts.Token);
+
+            // cts.Cancel();
+        }
+        
+        // Не получается сделать через этот метод, как будто бы он не вызывается 
+        static async Task ProduceAsync(CancellationToken ct, string id) 
+        {
+            Console.WriteLine("TEST123123");
+            using (IConnection connection = new ConnectionFactory().CreateConnection())
+            {
+                byte[] data = Encoding.UTF8.GetBytes(id);
+                connection.Publish("valuator.processing.rank", data);
+
+                await Task.Delay(1000);
+                
+                connection.Drain();
+
+                connection.Close();
+            }
         }
     }
 }
