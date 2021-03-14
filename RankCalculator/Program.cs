@@ -17,7 +17,7 @@ namespace RankCalculator
 
             Console.WriteLine("Consumer started");
 
-            IConnection c = new ConnectionFactory().CreateConnection();
+            IConnection connection = new ConnectionFactory().CreateConnection();
 
             EventHandler<MsgHandlerEventArgs> handler = (sender, args) =>
             {
@@ -27,17 +27,17 @@ namespace RankCalculator
                 storage.Store(Constants.rankPrefix + data, CalcRank(ref text).ToString()); 
             };
 
-            IAsyncSubscription s = c.SubscribeAsync("valuator.processing.rank", "load-balancing-queue", handler);
+            IAsyncSubscription subscription = connection.SubscribeAsync("valuator.processing.rank", "load-balancing-queue", handler);
 
-            s.Start();
+            subscription.Start();
 
             Console.WriteLine("Press Enter to exit");
             Console.ReadLine();
 
-            s.Unsubscribe();
+            subscription.Unsubscribe();
 
-            c.Drain();
-            c.Close();
+            connection.Drain();
+            connection.Close();
         }
 
         static double CalcRank(ref string text)
