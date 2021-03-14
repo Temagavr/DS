@@ -1,5 +1,5 @@
 ﻿using System;
-// using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System.Text;
 using NATS.Client;
 using Valuator;
@@ -8,10 +8,13 @@ namespace RankCalculator
 {
     class Program
     {
-        // private IStorage _storage = new RedisStorage(new ILogger<RedisStorage>());
-
         static void Main(string[] args)
         {
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            var logger = new Logger<RedisStorage>(loggerFactory);
+
+            IStorage storage = new RedisStorage(logger);
+
             Console.WriteLine("Consumer started");
 
             IConnection c = new ConnectionFactory().CreateConnection();
@@ -19,7 +22,9 @@ namespace RankCalculator
             EventHandler<MsgHandlerEventArgs> handler = (sender, args) =>
             {
                 string data = Encoding.UTF8.GetString(args.Message.Data); 
-                Console.WriteLine("THIS IS DATA = " + data);               
+                // Console.WriteLine("THIS IS DATA = " + data);             
+                string text = storage.Load(Constants.textPrefix + data);
+                storage.Store(Constants.rankPrefix + data, CalcRank(ref text).ToString()); 
             };
 
             IAsyncSubscription s = c.SubscribeAsync("valuator.processing.rank", "load-balancing-queue", handler);
@@ -35,7 +40,7 @@ namespace RankCalculator
             c.Close();
         }
 
-        public double CalcRank(string text)
+        static double CalcRank(ref string text)
         {
             double length = text.Length, notCharsCount = 0; 
             for(int i = 0; i != length; ++i)
