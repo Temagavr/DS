@@ -1,7 +1,10 @@
 cd ../../nats-server-v2.1.9-windows-386
 start nats-server.exe
 
-cd ../DS/Valuator
+cd ../DS/Common
+start dotnet build
+
+cd ../Valuator
 start dotnet run --urls "http://localhost:5001"
 start dotnet run --urls "http://localhost:5002"
 

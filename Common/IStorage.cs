@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 
-namespace Valuator
+namespace Common
 {
     public interface IStorage
     {

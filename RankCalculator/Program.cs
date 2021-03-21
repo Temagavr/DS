@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Text;
 using NATS.Client;
-using Valuator;
+using Common;
 
 namespace RankCalculator
 {
