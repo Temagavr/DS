@@ -28,7 +28,7 @@ namespace Valuator.Pages
         {
             _logger.LogDebug(id);
             
-            for(int check = 0; check < 10; ++check)
+            for(int check = 0; check < 20; ++check)
             {
                 if(_storage.ExistKey(Constants.rankPrefix + id))
                 {
