@@ -37,10 +37,12 @@ namespace Valuator.Pages
 
             string similarity = CheckSimilarity(text).ToString();
 
+            SendNatsMsg("SimilarityCalculated", id);
+
             string textKey = Constants.textPrefix + id;
             _storage.Store(textKey, text);
 
-            ActivateRankCalculator(id);
+            SendNatsMsg("valuator.processing.rank", id);
 
             string similarityKey = Constants.similarityPrefix + id;
             _storage.Store(similarityKey, similarity);            
@@ -65,23 +67,24 @@ namespace Valuator.Pages
             return similarity;
         }
 
-        public void ActivateRankCalculator(string id)
+        public void SendNatsMsg(string title, string value)
         {
             IConnection connection = new ConnectionFactory().CreateConnection();
             
-            byte[] data = Encoding.UTF8.GetBytes(id);
-            connection.Publish("valuator.processing.rank", data);
+            byte[] data = Encoding.UTF8.GetBytes(value);
+            connection.Publish(title, data);
 
             connection.Drain();
 
             connection.Close();
+            
             // CancellationTokenSource cts = new CancellationTokenSource();
 
             // Task.Factory.StartNew(() => ProduceAsync(cts.Token, id), cts.Token);
 
             // cts.Cancel();
         }
-        
+
         // Не получается сделать через этот метод, пока не знаю почему
         static async Task ProduceAsync(CancellationToken ct, string id) 
         {

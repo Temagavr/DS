@@ -9,5 +9,9 @@ cd ../RankCalculator
 start dotnet run
 start dotnet run
 
+cd ../EventLogger
+start dotnet run
+start dotnet run
+
 cd ../nginx
 start nginx.exe

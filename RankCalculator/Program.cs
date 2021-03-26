@@ -15,16 +15,17 @@ namespace RankCalculator
 
             IStorage storage = new RedisStorage(logger);
 
-            Console.WriteLine("Consumer started");
+            Console.WriteLine("RankCalculator started");
 
             IConnection connection = new ConnectionFactory().CreateConnection();
 
             EventHandler<MsgHandlerEventArgs> handler = (sender, args) =>
             {
-                string data = Encoding.UTF8.GetString(args.Message.Data); 
-                // Console.WriteLine("THIS IS DATA = " + data);             
+                string data = Encoding.UTF8.GetString(args.Message.Data);       
                 string text = storage.Load(Constants.textPrefix + data);
                 storage.Store(Constants.rankPrefix + data, CalcRank(ref text).ToString()); 
+            
+                connection.Publish("RankCalculated", args.Message.Data);
             };
 
             IAsyncSubscription subscription = connection.SubscribeAsync("valuator.processing.rank", "load-balancing-queue", handler);
