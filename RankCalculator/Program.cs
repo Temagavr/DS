@@ -23,9 +23,12 @@ namespace RankCalculator
             {
                 string data = Encoding.UTF8.GetString(args.Message.Data);       
                 string text = storage.Load(Constants.textPrefix + data);
-                storage.Store(Constants.rankPrefix + data, CalcRank(ref text).ToString()); 
-            
-                connection.Publish("RankCalculated", args.Message.Data);
+                string rank = CalcRank(ref text).ToString();
+                
+                storage.Store(Constants.rankPrefix + data, rank); 
+                
+                Event rankCalculatedEvent = new Event("RankCalculated", data, rank);
+                new NatsMessageBroker().SendMsgToLogger(rankCalculatedEvent);
             };
 
             IAsyncSubscription subscription = connection.SubscribeAsync("valuator.processing.rank", "load-balancing-queue", handler);

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using NATS.Client;
 using Common;
 
 namespace Valuator.Pages
@@ -18,10 +17,13 @@ namespace Valuator.Pages
 
         private IStorage _storage;
 
-        public IndexModel(ILogger<IndexModel> logger, IStorage storage)
+        private IMessageBroker _broker;
+
+        public IndexModel(ILogger<IndexModel> logger, IStorage storage, IMessageBroker broker)
         {
             _logger = logger;
             _storage = storage;
+            _broker = broker;
         }
 
         public void OnGet()
@@ -37,12 +39,13 @@ namespace Valuator.Pages
 
             string similarity = CheckSimilarity(text).ToString();
 
-            SendNatsMsg("SimilarityCalculated", id);
+            Event similarityCalculatedEvent = new Event("SimilarityCalculated", id, similarity);
+            _broker.SendMsgToLogger(similarityCalculatedEvent);
 
             string textKey = Constants.textPrefix + id;
             _storage.Store(textKey, text);
 
-            SendNatsMsg("valuator.processing.rank", id);
+            _broker.SendMsg("valuator.processing.rank", id);
 
             string similarityKey = Constants.similarityPrefix + id;
             _storage.Store(similarityKey, similarity);            
@@ -65,40 +68,6 @@ namespace Valuator.Pages
             }
 
             return similarity;
-        }
-
-        public void SendNatsMsg(string title, string value)
-        {
-            IConnection connection = new ConnectionFactory().CreateConnection();
-            
-            byte[] data = Encoding.UTF8.GetBytes(value);
-            connection.Publish(title, data);
-
-            connection.Drain();
-
-            connection.Close();
-            
-            // CancellationTokenSource cts = new CancellationTokenSource();
-
-            // Task.Factory.StartNew(() => ProduceAsync(cts.Token, id), cts.Token);
-
-            // cts.Cancel();
-        }
-
-        // Не получается сделать через этот метод, пока не знаю почему
-        static async Task ProduceAsync(CancellationToken ct, string id) 
-        {
-            using (IConnection connection = new ConnectionFactory().CreateConnection())
-            {
-                byte[] data = Encoding.UTF8.GetBytes(id);
-                connection.Publish("valuator.processing.rank", data);
-
-                await Task.Delay(1000);
-                
-                connection.Drain();
-
-                connection.Close();
-            }
         }
     }
 }

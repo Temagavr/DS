@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Text.Json;
 using NATS.Client;
 using Common;
 
@@ -22,8 +23,8 @@ namespace EventLogger
 
             EventHandler<MsgHandlerEventArgs> handler = (sender, args) =>
             {
-                string data = Encoding.UTF8.GetString(args.Message.Data); 
-                Console.WriteLine("THIS IS DATA = " + data);             
+                Event info = JsonSerializer.Deserialize<Event>(args.Message.Data); 
+                Console.WriteLine($"Event type: {info.type}; id: {info.id}; value: {info.value}");             
             };
 
             IAsyncSubscription subscription;
