@@ -5,9 +5,13 @@ namespace Common
 {
     public interface IStorage
     {
-        void Store(string key, string value);
+        void Store(string key, string value, string region);
 
-        string Load(string key);
+        void StoreToMap(string key, string value);
+
+        string GetShardId(string key);
+        
+        string Load(string key, string region);
         
         List<string> GetAllTexts();
 

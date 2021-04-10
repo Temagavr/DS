@@ -3,12 +3,24 @@
 @{
     ViewData["Title"] = "Home page";
 }
+@using Common
 
 <div class="text-center">
     <form method="post">
         <div class="col-2">Текст для оценки:</div>
         <div class="col-10">
             <textarea name="text" rows="5" cols="50"></textarea>
+        </div>
+        <div class="col-10">
+            <select name="region" id="">
+                <option value=@Constants.RusShardId>Russia</option>
+                <option value=@Constants.EuShardId>France</option>
+                <option value=@Constants.EuShardId>Germany</option>
+                <option value=@Constants.OtherShardId>Usa</option>
+                <option value=@Constants.OtherShardId>India</option>
+            </select>
+        </div>
+        <div class="col-10">
             <input type="submit" />
         </div>
     </form>

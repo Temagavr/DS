@@ -31,11 +31,13 @@ namespace Valuator.Pages
 
         }
 
-        public IActionResult OnPost(string text)
+        public IActionResult OnPost(string text, string region)
         {
             _logger.LogDebug(text);
 
             string id = Guid.NewGuid().ToString();
+            
+            _storage.StoreToMap(id, region);
 
             string similarity = CheckSimilarity(text).ToString();
 
@@ -43,12 +45,12 @@ namespace Valuator.Pages
             _broker.SendMsgToLogger(similarityCalculatedEvent);
 
             string textKey = Constants.textPrefix + id;
-            _storage.Store(textKey, text);
+            _storage.Store(textKey, text, region);
 
             _broker.SendMsg("valuator.processing.rank", id);
 
             string similarityKey = Constants.similarityPrefix + id;
-            _storage.Store(similarityKey, similarity);            
+            _storage.Store(similarityKey, similarity, region);            
 
             return Redirect($"summary?id={id}");
         }

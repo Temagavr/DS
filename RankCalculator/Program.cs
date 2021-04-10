@@ -21,11 +21,12 @@ namespace RankCalculator
 
             EventHandler<MsgHandlerEventArgs> handler = (sender, args) =>
             {
-                string data = Encoding.UTF8.GetString(args.Message.Data);       
-                string text = storage.Load(Constants.textPrefix + data);
+                string data = Encoding.UTF8.GetString(args.Message.Data);  
+                string region = storage.GetShardId(data);
+                string text = storage.Load(Constants.textPrefix + data, region);
                 string rank = CalcRank(ref text).ToString();
                 
-                storage.Store(Constants.rankPrefix + data, rank); 
+                storage.Store(Constants.rankPrefix + data, rank, region); 
                 
                 Event rankCalculatedEvent = new Event("RankCalculated", data, rank);
                 new NatsMessageBroker().SendMsgToLogger(rankCalculatedEvent);

@@ -30,14 +30,14 @@ namespace Valuator.Pages
             
             for(int check = 0; check < 20; ++check)
             {
-                if(_storage.ExistKey(Constants.rankPrefix + id))
+                if(_storage.ExistKey(id))
                 {
-                    Rank = Convert.ToDouble(_storage.Load(Constants.rankPrefix + id));
+                    Rank = Convert.ToDouble(_storage.Load(Constants.rankPrefix + id, _storage.GetShardId(id)));
                     break;
                 }
             }
 
-            Similarity = Convert.ToDouble(_storage.Load(Constants.similarityPrefix + id));
+            Similarity = Convert.ToDouble(_storage.Load(Constants.similarityPrefix + id, _storage.GetShardId(id)));
         }
     }
 }
