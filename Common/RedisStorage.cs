@@ -9,7 +9,6 @@ namespace Common
     {
         private readonly ILogger<RedisStorage> _logger;
 
-        private IDatabase _db;
         private IConnectionMultiplexer _conn;
         private IConnectionMultiplexer _conn_Ru;
         private IConnectionMultiplexer _conn_Eu;
@@ -19,7 +18,6 @@ namespace Common
         {
             _logger = logger;
             _conn = ConnectionMultiplexer.Connect("localhost");
-            _db = _conn.GetDatabase();
 
             _conn_Ru = 
                 ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("DB_" + Constants.RusShardId, EnvironmentVariableTarget.User));
@@ -58,16 +56,20 @@ namespace Common
             if(key == "" || value == "")
                 return;
 
-            _db.StringSet(key, value);
+            var db = _conn.GetDatabase();
+            db.StringSet(key, value);
         }
 
         public string GetShardId(string key)
         {
-            return _db.StringGet(key);
+            var db = _conn.GetDatabase();
+            return db.StringGet(key);
         }
 
         public string Load(string key, string region)
         {
+            _logger.LogWarning($"LOOKUP: {key}, {region}");
+            
             if(key == "" || region == "")
                 return "";
             else
@@ -87,20 +89,12 @@ namespace Common
         public List<string> GetAllTexts()
         {
             List<string> texts = new List<string>();
-            List<IConnectionMultiplexer> connections = new List<IConnectionMultiplexer>()
-            {
-                _conn_Ru, _conn_Eu, _conn_Other 
-            };
 
-            foreach (var conn in connections)
+            var db = _conn.GetDatabase();
+            RedisResult[] textsKeys = (RedisResult[])db.Execute("keys", "*");
+            foreach (RedisResult key in textsKeys)
             {
-                var db = conn.GetDatabase();
-                RedisResult[] textsKeys = (RedisResult[])db.Execute("keys", "TEXT-*");
-                foreach (RedisResult key in textsKeys)
-                {
-                    texts.Add(Load(key.ToString(), GetShardId(key.ToString())));
-                }
-
+                texts.Add(Load(Constants.textPrefix + key.ToString(), GetShardId(key.ToString())));
             }
             
             return texts;
@@ -108,7 +102,8 @@ namespace Common
 
         public bool ExistKey(string key)
         {
-            return (bool)_db.Execute("exists", key);
+            var db = _conn.GetDatabase();
+            return (bool)db.Execute("exists", key);
         }
     }
 }
