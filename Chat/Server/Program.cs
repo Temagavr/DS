@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 
 namespace Server
 {
     class Program
     {
-        public static void StartListening()
+        public static void StartListening(int port)
         {
 
             // Разрешение сетевых имён
@@ -16,7 +17,7 @@ namespace Server
             // Привязываем сокет ко всем интерфейсам на текущей машинe
             IPAddress ipAddress = IPAddress.Any; 
             
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
 
             // CREATE
             Socket listener = new Socket(
@@ -36,11 +37,9 @@ namespace Server
 
                 while (true)
                 {
-                    Console.WriteLine("Ожидание соединения клиента...");
                     // ACCEPT
                     Socket handler = listener.Accept();
 
-                    Console.WriteLine("Получение данных...");
                     byte[] buf = new byte[1024];
                     string data = null;
                     while (true)
@@ -50,18 +49,21 @@ namespace Server
 
                         data += Encoding.UTF8.GetString(buf, 0, bytesRec);
 
-                        history.Add(data);
+                        int index = data.IndexOf("<EOF>"); 
 
-                        if (data.IndexOf("<EOF>") > -1)
+                        if (index > -1)
                         {
+                            data = data.Substring(0, index);
+                            history.Add(data);
+
                             break;
                         }
                     }
 
                     Console.WriteLine("Полученный текст: {0}", data);
 
-                    // Отправляем текст обратно клиенту
-                    byte[] msg = Encoding.UTF8.GetBytes(history);
+                    // Отправляем историю клиенту
+                    byte[] msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(history));
 
                     // SEND
                     handler.Send(msg);
@@ -80,7 +82,7 @@ namespace Server
         static void Main(string[] args)
         {
             Console.WriteLine("Запуск сервера...");
-            StartListening();
+            StartListening(Convert.ToInt32(args[0]));
 
             Console.WriteLine("\nНажмите ENTER чтобы выйти...");
             Console.Read();

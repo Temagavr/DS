@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Net;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 
 namespace Client
 {
     class Program
     {
-        public static void StartClient()
+        public static void StartClient(string host, int port, string message)
         {
             try
             {
                 // Разрешение сетевых имён
                 IPAddress ipAddress = IPAddress.Loopback;
-                //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                //IPAddress ipAddress = ipHostInfo.AddressList[0];
+                // IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
+                // IPAddress ipAddress = ipHostInfo.AddressList[0];
 
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
                 // CREATE
                 Socket sender = new Socket(
@@ -33,7 +35,8 @@ namespace Client
                         sender.RemoteEndPoint.ToString());
 
                     // Подготовка данных к отправке
-                    byte[] msg = Encoding.UTF8.GetBytes("Hello, world!<EOF>");
+                    message += "<EOF>";
+                    byte[] msg = Encoding.UTF8.GetBytes(message);
 
                     // SEND
                     int bytesSent = sender.Send(msg);
@@ -41,12 +44,13 @@ namespace Client
                     // RECEIVE
                     byte[] buf = new byte[1024];
                     int bytesRec = sender.Receive(buf);
+    
+                    List<string> history = JsonSerializer.Deserialize<List<string>>(Encoding.UTF8.GetString(buf, 0, bytesRec));                 
 
-                    
-
-                    // foreach(var str in )
-                    Console.WriteLine("Ответ: {0}",
-                        Encoding.UTF8.GetString(buf, 0, bytesRec));
+                    foreach(var str in history)
+                    {
+                        Console.WriteLine(str);
+                    }
 
                     // RELEASE
                     sender.Shutdown(SocketShutdown.Both);
@@ -75,7 +79,7 @@ namespace Client
 
         static void Main(string[] args)
         {
-            StartClient();
+            StartClient(args[0], int.Parse(args[1]), args[2]);
         }
     }
 }
