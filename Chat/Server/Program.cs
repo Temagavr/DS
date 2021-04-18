@@ -60,7 +60,7 @@ namespace Server
                         }
                     }
 
-                    Console.WriteLine("Полученный текст: {0}", data);
+                    Console.WriteLine("Message received: {0}", data);
 
                     // Отправляем историю клиенту
                     byte[] msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(history));
@@ -81,11 +81,10 @@ namespace Server
         }
         static void Main(string[] args)
         {
-            Console.WriteLine("Запуск сервера...");
-            StartListening(Convert.ToInt32(args[0]));
-
-            Console.WriteLine("\nНажмите ENTER чтобы выйти...");
-            Console.Read();
+            if(args.Length != 1)
+                Console.WriteLine("Invalid argument count");
+            else
+                StartListening(Convert.ToInt32(args[0]));
         }
     }
 }

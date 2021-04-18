@@ -14,9 +14,13 @@ namespace Client
             try
             {
                 // Разрешение сетевых имён
-                IPAddress ipAddress = IPAddress.Loopback;
-                // IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
-                // IPAddress ipAddress = ipHostInfo.AddressList[0];
+                IPAddress ipAddress;
+
+                if(host == "localhost")
+                    ipAddress = IPAddress.Loopback;
+                else
+                    ipAddress = IPAddress.Parse(host);
+                
 
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
@@ -30,9 +34,6 @@ namespace Client
                 {
                     // CONNECT
                     sender.Connect(remoteEP);
-
-                    Console.WriteLine("Удалённый адрес подключения сокета: {0}",
-                        sender.RemoteEndPoint.ToString());
 
                     // Подготовка данных к отправке
                     message += "<EOF>";
@@ -79,7 +80,10 @@ namespace Client
 
         static void Main(string[] args)
         {
-            StartClient(args[0], int.Parse(args[1]), args[2]);
+            if(args.Length != 3)
+                Console.WriteLine("Invalid argument count");
+            else
+                StartClient(args[0], Convert.ToInt32(args[1]), args[2]);
         }
     }
 }
