@@ -1,3 +1,5 @@
+start build.cmd
+
 cd ../Valuator
 start dotnet run --no-build --urls "http://localhost:5001"
 start dotnet run --no-build --urls "http://localhost:5002"
