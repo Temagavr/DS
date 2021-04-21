@@ -1,4 +1,4 @@
-start build.cmd
+start /wait build.cmd
 
 cd ../Valuator
 start dotnet run --no-build --urls "http://localhost:5001"

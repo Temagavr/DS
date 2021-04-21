@@ -1,11 +1,13 @@
 cd ../Common
-start dotnet build
+start /wait dotnet build
 
 cd ../Valuator
-start dotnet build
+start /wait dotnet build
 
 cd ../RankCalculator
-start dotnet build
+start /wait dotnet build
 
 cd ../EventLogger
-start dotnet build
+start /wait dotnet build
+
+exit
