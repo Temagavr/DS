@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -43,26 +44,29 @@ namespace Client
                     int bytesSent = sender.Send(msg);
 
                     // RECEIVE
-                    byte[] buf = new byte[1024];
+                    byte[] buf = new byte[sizeof(int)];
+                    int bytesRec = sender.Receive(buf);
+                    MemoryStream ms = new MemoryStream();
                     
-                    string receivedData = "";
-                    List<string> history = new List<string>();
-
-                    while(true)
+                    while(bytesRec > 0)
                     {
-                        int bytesRec = sender.Receive(buf);
-                        receivedData += Encoding.UTF8.GetString(buf, 0, bytesRec);
+                        ms.Write(buf, 0, bytesRec);
 
-                        try
-                        {
-                            history = JsonSerializer.Deserialize<List<string>>(receivedData);
-                            break;
-                        }
-                        catch(Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                        }
-                    }              
+                        if(sender.Available > 0)
+                            bytesRec = sender.Receive(buf);
+                        else    
+                            bytesRec = 0;
+                    }
+                    ms.Flush();
+                    ms.Position = 0;
+
+                    string receivedData = "";
+                    using (StreamReader reader = new StreamReader(ms, Encoding.UTF8))
+                    {
+                        receivedData = reader.ReadToEnd();
+                    }
+                    
+                    List<string> history = JsonSerializer.Deserialize<List<string>>(receivedData);   
 
                     foreach(var str in history)
                     {
